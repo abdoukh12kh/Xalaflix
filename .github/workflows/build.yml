@@ -1,8 +1,14 @@
 name: Build CloudStream Extension
-
-on:
+concurrency: 
+  group: "build"
+  cancel-in-progress: true
+    on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+  workflow_dispatch:
 
 jobs:
   build:
