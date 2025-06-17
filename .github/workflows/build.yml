@@ -39,12 +39,10 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - name: Build Plugins
-        run: |
-          cd $GITHUB_WORKSPACE/src
-          chmod +x ./gradlew
-          ./gradlew :main:make :main:makePluginsJson
-          cp -v main/build/*.cs3 $GITHUB_WORKSPACE/builds || echo "No .cs3 files found"
-          cp -v build/plugins.json $GITHUB_WORKSPACE/builds || echo "No plugins.json found"
+      run: |
+  cd $GITHUB_WORKSPACE/src
+  chmod +x gradlew
+  ./gradlew :xalaflix:make makePluginsJson
 
       - name: Push builds to builds branch
         env:
