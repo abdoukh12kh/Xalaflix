@@ -1,27 +1,27 @@
 name: Build
 
-concurrency: 
+concurrency:
   group: "build"
   cancel-in-progress: true
 
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - '*.md'
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Source Code
+      - name: Checkout source code
         uses: actions/checkout@v4
         with:
           path: src
 
-      - name: Checkout Builds Branch
+      - name: Checkout builds branch
         uses: actions/checkout@v4
         with:
           ref: builds
@@ -30,28 +30,30 @@ jobs:
       - name: Clean old builds
         run: rm -f $GITHUB_WORKSPACE/builds/*.cs3
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
         with:
-          distribution: 'temurin'
           java-version: 17
 
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
           chmod +x ./gradlew
-          ./gradlew make makePluginsJson
-          find . -name "*.cs3" -exec cp {} $GITHUB_WORKSPACE/builds \;
-          cp build/plugins.json $GITHUB_WORKSPACE/builds
+          ./gradlew :main:make :main:makePluginsJson
+          cp -v main/build/*.cs3 $GITHUB_WORKSPACE/builds || echo "No .cs3 files found"
+          cp -v build/plugins.json $GITHUB_WORKSPACE/builds || echo "No plugins.json found"
 
-      - name: Push Builds
+      - name: Push builds to builds branch
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           cd $GITHUB_WORKSPACE/builds
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
+          git config user.name "abdoukh12kh"
+          git config user.email "zaaaa.b.d30@gmail.com"
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
           git add .
           git commit --amend -m "Build $GITHUB_SHA" || echo "Nothing to commit"
-          git push --force
+          git push origin HEAD:builds --force
