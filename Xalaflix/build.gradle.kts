@@ -1,8 +1,11 @@
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+    id("com.lagradost.cloudstream3.gradle")
+}
 
-version = 1
 cloudstream {
     language = "en"
-    description = "Xalaflix streaming extension with movies, series, subtitles, and multi-quality playback"
+    description = "Xalaflix plugin"
     authors = listOf("YourName")
-    iconUrl = "https://xalaflix.io/favicon.ico"
 }
