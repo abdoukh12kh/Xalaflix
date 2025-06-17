@@ -1,0 +1,30 @@
+name: Build CloudStream Extension
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permission
+      run: chmod +x gradlew
+
+    - name: Build the extension
+      run: ./gradlew :Xalaflix:build
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Xalaflix.cs3
+        path: Xalaflix/build/outputs/extension/*.cs3
