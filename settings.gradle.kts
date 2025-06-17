@@ -1,3 +1,3 @@
 
-rootProject.name = "cloudstream-xalaflix"
-include(":Xalaflix")
+rootProject.name = "xalaflix"
+include(":xalaflix")
