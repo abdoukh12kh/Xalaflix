@@ -1,46 +1,56 @@
-name: Build Xalaflix1 Extension
+name: Build
+
+concurrency: 
+  group: "build"
+  cancel-in-progress: true
 
 on:
   push:
-    branches: [master]
+    branches:
+      - main
     paths-ignore:
       - '*.md'
   workflow_dispatch:
 
-concurrency:
-  group: "build"
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout plugin source
+      - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
           path: src
 
-      - name: Set up JDK 17
+      - name: Checkout Builds Branch
+        uses: actions/checkout@v4
+        with:
+          ref: builds
+          path: builds
+
+      - name: Clean old builds
+        run: rm -f $GITHUB_WORKSPACE/builds/*.cs3
+
+      - name: Setup JDK 17
         uses: actions/setup-java@v3
         with:
+          distribution: 'temurin'
           java-version: 17
-          distribution: temurin
 
-      - name: Set up Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Build plugin
+      - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
-          chmod +x gradlew
+          chmod +x ./gradlew
           ./gradlew make makePluginsJson
-          mkdir -p $GITHUB_WORKSPACE/builds
-          cp **/build/outputs/extension/*.cs3 $GITHUB_WORKSPACE/builds || echo "No .cs3 file"
-          cp build/plugins.json $GITHUB_WORKSPACE/builds || echo "No plugins.json"
+          find . -name "*.cs3" -exec cp {} $GITHUB_WORKSPACE/builds \;
+          cp build/plugins.json $GITHUB_WORKSPACE/builds
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: xalaflix1-extension
-          path: builds/
+      - name: Push Builds
+        run: |
+          cd $GITHUB_WORKSPACE/builds
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add .
+          git co
